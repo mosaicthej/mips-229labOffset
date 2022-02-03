@@ -178,7 +178,7 @@ _bgez: # no t-reg
 	la      $a0, str_bgez	# load instruction text
 	j       _toPrint
 
-_begzal: # no t-reg
+_bgezal: # no t-reg
 	addi    $s4, $zero, 0
 	la      $a0, str_bgezal	# load instruction text
 	j       _toPrint
