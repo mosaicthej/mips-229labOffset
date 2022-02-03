@@ -87,19 +87,19 @@ _opc1:
 	# branches according to the t-reg value hold by $s2
 	# 1 = 00001
 	addi    $t0, $zero, 1		# $t0 = 1
-	beq		$t0, $s0, _bgez		# if t-reg == 1, goto _bgez
+	beq		$t0, $s2, _bgez		# if t-reg == 1, goto _bgez
 
 	# 17 = 10001
 	addi    $t0, $zero, 17		# $t0 = 17
-	beq		$t0, $s0, _bgezal	# if t-reg == 17, goto _bgezal
+	beq		$t0, $s2, _bgezal	# if t-reg == 17, goto _bgezal
 
 	# 0 = 00000
 	addi    $t0, $zero, 0		# $t0 = 0
-	beq		$t0, $s0, _bltz	# if t-reg == 0, goto _bltz
+	beq		$t0, $s2, _bltz	# if t-reg == 0, goto _bltz
 
 	# 16 = 10000
 	addi    $t0, $zero, 16		# $t0 = 16
-	beq		$t0, $s0, _bltzal	# if t-reg == 16, goto _bltzal
+	beq		$t0, $s2, _bltzal	# if t-reg == 16, goto _bltzal
 
 
 # branches to load instruction text
@@ -165,7 +165,7 @@ _toPrint: # procedure to print
 	# check the flag ($s4) to see if need to print t-reg
 	beqz    $s4, _prtImmd # if flag is 0, proceed to immediate printing
 	# else, print t-reg first, which is in $s2
-	# print $
+	# print $$
 	la		$a0, str_dollar	# load $
 	li		$v0, 4		# print $
 	syscall
