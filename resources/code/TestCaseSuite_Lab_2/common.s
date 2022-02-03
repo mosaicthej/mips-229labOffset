@@ -223,20 +223,20 @@ _toPrint: # procedure to print
 	syscall
 
 	# print s-reg number, which is in $s1
-	addi	$a0, $s1
+	addi	$a0, $s1, 0
 	li      $v0, 1		# print int
 	syscall				
-	addi	$a0, str_comma
+	la		$a0, str_comma
 	li      $v0, 4
 	syscall
 
 	# check the flag ($s4) to see if need to print t-reg
 	beqz    $s4, _prtImmd # if flag is 0, proceed to immediate printing
 	# else, print t-reg first, which is in $s2
-	addi	$a0, $s2
+	addi	$a0, $s2, 0
 	li      $v0, 1		# print int
 	syscall				
-	addi	$a0, str_comma
+	la		$a0, str_comma
 	li      $v0, 4
 	syscall
 
