@@ -15,7 +15,6 @@ nlStrCom:
 	.asciiz "\n"
 pointerStorage:
 	.word 0x00
-
 .text
 .globl disassembleBranch # Make disassembleBranch into a global symbol so it
                          # it can be used as a breakpoint
