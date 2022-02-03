@@ -22,13 +22,18 @@ disassembleBranch:
     #   if instruction a branch, print instruction to screen
     lw      $t7, 0($a0)     # load instruction in $a0 to $t7
     # now dissect $t7 to fields: opcode, s-reg, t-reg, immediate
-    # needs 4 s registers to save them. Preserve registers:
-    addi	$sp, $sp, -20	# allocate memory.
+    # needs 4 s registers to save them. 
+	# also need registers for the rt-flag and loop counter as we need to 
+	# step into the syscall function, which may overwrite t-registers
+	
+	# Preserve registers:
+    addi	$sp, $sp, -24	# allocate memory.
     sw      $s0, 0($sp) 	# $s0 in 1st
     sw      $s1, 4($sp) 	# $s1 in 2nd   
     sw 		$s2, 8($sp) 	# $s2 in 3rd
 	sw      $s3, 12($sp) 	# $s3 in 4th
 	sw      $s4, 16($sp)	# $s4 in 5th
+	sw		$s5, 20($sp)	# $s5 in 6th
 
 
     srl		$s0, $t7, 26		# $s0 now holds the opcode
@@ -67,12 +72,13 @@ disassembleBranch:
 # naturally flow to exit point
 _done:
     # when program terminates, 
+	lw      $s5, 20($sp)		# restore $s5
 	lw		$s4, 16	($sp)		# restore $s4
 	lw		$s3, 12($sp)		# restore $s3	
 	lw 		$s2, 8($sp)			# Restore $s2.
   	lw 	  	$s1, 4($sp)         # Restore $s1.
   	lw    	$s0, 0($sp) 		# Restore $s0.
-  	addi  	$sp, $sp, 20		# Deallocate three slots from stack.
+  	addi  	$sp, $sp, 24		# Deallocate three slots from stack.
 
 	# return to calling routine
     jr		$ra					# jump to $ra
@@ -167,3 +173,61 @@ _toPrint: # procedure to print
 	syscall
 
 	
+_prtImmd:
+	# print hex prefix (0x) first
+	la		$a0, str_0x
+	li      $v0, 4
+	syscall
+
+	# logic in C as following:
+
+	# i = 8
+	# while (i>0) {
+	#	load_ith_digit()
+	# 	if (is_digit){
+	# 		print_digit();}
+	# 	else {
+	# 		print_letter();
+	# 	}
+	# 	i--;
+	# }
+
+
+	addi    $s5, $zero, 8	# $s5 as counter to loop
+	addi	$t5, $zero, 10	# set the numeric-alphbetic threshold
+	_prtDigLoop:
+		# exit the loop if counter < 0:
+		blez	$s5, _done
+
+		srl		$t6, $s3, 28 	# putting top 4-bit (1-hex-char) to $t6
+		sll		$s3, $s3, 4		# move the header to next hex
+		# compare against the threshold to check if goto print letter or digit
+		blt		$t6, $t5, _prtNum
+		_prtChar:
+			# print the value in $t6 (>10) as letter
+			# change it from numeric value to 
+			# 	the corresponding ascii char value.
+			# add 55 from 10 -> 'A', 11 -> 'B', etc...
+			addi	$t6, $t6, 55
+			addi	$a0, $t6, 0
+			li		$v0, 11			# print_char mode
+			syscall 
+			j		_prtDigLoopEnds	# past the if-clause
+		_prtNum:
+			# print the value in $t6 as digit(as appeared)
+			move	$a0, $t6
+			li		$v0, 1			# print_int mode
+			syscall
+		
+		_prtDigLoopEnds:
+			# the hex 4-bit has printed.
+			# decrease the counter, and go to head of the loop
+			addi	$s5, $s5, -1
+			j		_prtDigLoop
+		
+	
+			
+
+
+
+
