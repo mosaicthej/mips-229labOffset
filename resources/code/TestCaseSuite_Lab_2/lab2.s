@@ -206,23 +206,23 @@ _prtImmd:
 		srl		$t6, $s3, 28 	# putting top 4-bit (1-hex-char) to $t6
 		sll		$s3, $s3, 4		# move the header to next hex
 		# compare against the threshold to check if goto print letter or digit
-		blt		$t6, $t5, _prtNum
-		_prtChar:
+		blt		$t6, $t5, _setNum
+		_setABC:
 			# print the value in $t6 (>10) as letter
 			# change it from numeric value to 
 			# 	the corresponding ascii char value.
 			# add 55 from 10 -> 'A', 11 -> 'B', etc...
-			addi	$t6, $t6, 55
-			addi	$a0, $t6, 0
+			addi	$a0, $t6, 55
+			j		_prtChar	# past the if-clause
+		_setNum:
+			# print the value in $t6 as digit(as appeared)
+			# add 48 from 0->'0', 1->'1', ...
+			addi	$a0, $t6, 48
+		_prtChar:
+			# with $a0 store the char value of what to be printed
 			li		$v0, 11			# print_char mode
 			syscall 
-			j		_prtDigLoopEnds	# past the if-clause
-		_prtNum:
-			# print the value in $t6 as digit(as appeared)
-			move	$a0, $t6
-			li		$v0, 1			# print_int mode
-			syscall
-		
+
 		_prtDigLoopEnds:
 			# the hex 4-bit has printed.
 			# decrease the counter, and go to head of the loop
