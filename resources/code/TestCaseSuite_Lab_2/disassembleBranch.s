@@ -23,11 +23,12 @@ disassembleBranch:
     lw      $t7, 0($a0)     # load instruction in $a0 to $t7
     # now dissect $t7 to fields: opcode, s-reg, t-reg, immediate
     # needs 4 s registers to save them. Preserve registers:
-    addi	$sp, $sp, -16	# allocate memory.
+    addi	$sp, $sp, -20	# allocate memory.
     sw      $s0, 0($sp) 	# $s0 in 1st
     sw      $s1, 4($sp) 	# $s1 in 2nd   
     sw 		$s2, 8($sp) 	# $s2 in 3rd
 	sw      $s3, 12($sp) 	# $s3 in 4th
+	sw      $s4, 16($sp)	# $s4 in 5th
 
 
     srl		$s0, $t7, 26		# $s0 now holds the opcode
@@ -66,11 +67,12 @@ disassembleBranch:
 # naturally flow to exit point
 _done:
     # when program terminates, 
-	lw		$s3, 12($sp)			
+	lw		$s4, 16	($sp)		# restore $s4
+	lw		$s3, 12($sp)		# restore $s3	
 	lw 		$s2, 8($sp)			# Restore $s2.
   	lw 	  	$s1, 4($sp)         # Restore $s1.
   	lw    	$s0, 0($sp) 		# Restore $s0.
-  	addi  	$sp, $sp, 16 		# Deallocate three slots from stack.
+  	addi  	$sp, $sp, 20		# Deallocate three slots from stack.
 
 	# return to calling routine
     jr		$ra					# jump to $ra
@@ -95,28 +97,73 @@ _opc1:
 
 
 # branches to load instruction text
-# also determines if t-reg are included or not (by using flag in $t1)
+# also determines if t-reg are included or not (by using flag in $s4)
 
 _bgez: # no t-reg
-	addi    $t1, $zero, 0
+	addi    $s4, $zero, 0
+	la      $a0, str_bgez	# load instruction text
+	j       _toPrint
 
 _begzal: # no t-reg
-	addi    $t1, $zero, 0
+	addi    $s4, $zero, 0
+	la      $a0, str_bgezal	# load instruction text
+	j       _toPrint
 
 _bltz: # no t-reg
-	addi 	$t1, $zero, 0
+	addi 	$s4, $zero, 0
+	la      $a0, str_bltz	# load instruction text
+	j       _toPrint
 
 _bltzal: # no t-reg
-	addi	$t1, $zero, 0
+	addi	$s4, $zero, 0
+	la      $a0, str_bltzal	# load instruction text
+	j       _toPrint
 	
 _beq: # has t-reg
-	addi    $t1, $zero, 1
+	addi    $s4, $zero, 1
+	la		$a0, str_beq	# load instruction text
+	j       _toPrint
 
 _bne: # has t-reg
-	addi    $t1, $zero, 1
+	addi    $s4, $zero, 1
+	la      $a0, str_bne	# load instruction text
+	j       _toPrint
 
 _blez: # no t-reg
-	addi	$t1, $zero, 0
+	addi	$s4, $zero, 0
+	la      $a0, str_blez	# load instruction text
+	j       _toPrint
 	
 _bgtz: # no t-reg
-	addi	$t1, $zero, 0
+	addi	$s4, $zero, 0
+	la      $a0, str_bgtz	# load instruction text
+
+_toPrint: # procedure to print
+	# print instruction, (which is already saved in $a0)
+	li      $v0, 4		# print instruction
+	syscall
+
+	# print $
+	la		$a0, str_dollar	# load $
+	li		$v0, 4		# print $
+	syscall
+
+	# print s-reg number, which is in $s1
+	addi	$a0, $s1
+	li      $v0, 1		# print int
+	syscall				
+	addi	$a0, str_comma
+	li      $v0, 4
+	syscall
+
+	# check the flag ($s4) to see if need to print t-reg
+	beqz    $s4, _prtImmd # if flag is 0, proceed to immediate printing
+	# else, print t-reg first, which is in $s2
+	addi	$a0, $s2
+	li      $v0, 1		# print int
+	syscall				
+	addi	$a0, str_comma
+	li      $v0, 4
+	syscall
+
+	
