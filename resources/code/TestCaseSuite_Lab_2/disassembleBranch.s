@@ -1,4 +1,15 @@
 .data
+str_bgez: 	.asciiz "bgez "
+str_bgezal: .asciiz "bgezal "
+str_bltz:	.asciiz "bltz "
+str_bltzal:	.asciiz "bltzal "
+str_beq:	.asciiz "beq "
+str_bne:	.asciiz "bne "
+str_blez:	.asciiz "blez "
+str_bgtz:	.asciiz "bgtz "
+str_comma:  .asciiz ", "
+str_dollar:	.asciiz "$"
+str_0x:		.asciiz "0x"
 
 
 .text
@@ -72,14 +83,40 @@ _opc1:
 
 	# 17 = 10001
 	addi    $t0, $zero, 17		# $t0 = 17
-	beq		$t0, $s0, _begzal	# if t-reg == 17, goto _bgezal
+	beq		$t0, $s0, _bgezal	# if t-reg == 17, goto _bgezal
 
 	# 0 = 00000
 	addi    $t0, $zero, 0		# $t0 = 0
-	beq		$t0, $s0, _begzal	# if t-reg == 0, goto _bltz
+	beq		$t0, $s0, _bltz	# if t-reg == 0, goto _bltz
 
 	# 16 = 10000
 	addi    $t0, $zero, 16		# $t0 = 16
-	beq		$t0, $s0, _begzal	# if t-reg == 16, goto _bltzal
+	beq		$t0, $s0, _bltzal	# if t-reg == 16, goto _bltzal
 
+
+# branches to load instruction text
+# also determines if t-reg are included or not (by using flag in $t1)
+
+_bgez: # no t-reg
+	addi    $t1, $zero, 0
+
+_begzal: # no t-reg
+	addi    $t1, $zero, 0
+
+_bltz: # no t-reg
+	addi 	$t1, $zero, 0
+
+_bltzal: # no t-reg
+	addi	$t1, $zero, 0
 	
+_beq: # has t-reg
+	addi    $t1, $zero, 1
+
+_bne: # has t-reg
+	addi    $t1, $zero, 1
+
+_blez: # no t-reg
+	addi	$t1, $zero, 0
+	
+_bgtz: # no t-reg
+	addi	$t1, $zero, 0
