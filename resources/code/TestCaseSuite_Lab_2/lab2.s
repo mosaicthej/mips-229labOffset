@@ -20,7 +20,7 @@ disassembleBranch:
     # @out:
     #   if instruction is not branch: no output.
     #   if instruction a branch, print instruction to screen
-    lw      $t7, 4($a0)     # load instruction in $a0 to $t7
+    lw      $t7, 0($a0)     # load instruction in $a0 to $t7
     # now dissect $t7 to fields: opcode, s-reg, t-reg, immediate
     # needs 4 s registers to save them. 
 	# also need registers for the rt-flag and loop counter as we need to 
