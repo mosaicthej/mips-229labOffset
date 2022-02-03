@@ -14,7 +14,7 @@ str_0x:		.asciiz "0x"
 
 .text
 
-# disassembleBranch:
+disassembleBranch:
     # @arg:
     #   $a0: address of this branch instruction.
     # @out:
