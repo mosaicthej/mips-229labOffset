@@ -66,3 +66,4 @@ main:
 	main_done:
 		li	$v0 10
 		syscall
+
