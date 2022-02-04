@@ -278,8 +278,8 @@ _prtImmd:
 			# print the value in $t6 (>10) as letter
 			# change it from numeric value to 
 			# 	the corresponding ascii char value.
-			# add 55 from 10 -> 'A', 11 -> 'B', etc...
-			addi	$a0, $t6, 55
+			# add 87 from 10 -> 'a', 11 -> 'b', etc...
+			addi	$a0, $t6, 87
 			j		_prtChar	# past the if-clause
 		_setNum:
 			# print the value in $t6 as digit(as appeared)
