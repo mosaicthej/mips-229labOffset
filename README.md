@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CMPUT 229 Lab 2 - Hexadecimal and Branching
 
 ## Information
@@ -83,3 +84,7 @@ There is a single file to be submitted for this lab. The file name should be `la
 **To ensure that we have the latest version of your solution, make sure to commit your changes to the repo frequently. Otherwise, you may forget to commit your latest changes by the deadline (which will count as a late lab, and will not be graded). Your solution will be automatically collected via GitHub Classroom by the deadline.**
 
 **Every file you commit to the repository MUST include the [CMPUT 229 Student Submission License](LICENSE.md) text at the very top, and you must include your name in the appropriate place in the license text. Make sure to comment out the license text if you are adding it to a code file (e.g., `lab2.s`), otherwise, your code will not compile or run. Failing to comply will render your submission inadmissible for grading.**
+=======
+# mips-229labOffset
+codes for 229 lab2 offset, made to public
+>>>>>>> origin/master
