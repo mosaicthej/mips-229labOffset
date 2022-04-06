@@ -1,21 +1,5 @@
-#-------------------------------
-# Branch De-Offsetting - Marking Common File
-# Author: Taylor Lloyd
-# Date: July 18, 2012
-#
-#-------------------------------
 
 .data
-	.align 2
-binary:
-	.space 2052
-noFileStr:
-	.asciiz "Couldn't open specified file.\n"
-nlStrCom:
-	.asciiz "\n"
-pointerStorage:
-	.word 0x00
-
 str_bgez:   .asciiz "bgez"
 str_bgezal: .asciiz "bgezal"
 str_bltz:   .asciiz "bgezal"
@@ -31,60 +15,7 @@ str_hex:    .asciiz "0x"
 
 
 
-
-
 .text
-.globl disassembleBranch # Make disassembleBranch into a global symbol so it
-                         # it can be used as a breakpoint
-
-main:
-	lw	$a0 4($a1)	# Put the filename pointer into $a0
-	li	$a1 0		# Read Only
-	li	$a2 0		# No Mode Specified
-	li	$v0 13		# Open File
-	syscall
-	bltz	$v0 main_err	# Negative means open failed
-
-	move	$a0 $v0		#point at open file
-	la	$a1 binary	# write into my binary space
-	li	$a2 2048	# read a file of at max 2kb
-	li	$v0 14		# Read File Syscall
-	syscall
-	la	$t0 binary
-	add	$t0 $t0 $v0	#point to end of binary space
-
-	li	$t1 0xFFFFFFFF	#Place ending sentinel
-	sw	$t1 0($t0)
-
-	la	$a0 binary
-	main_loop:
-		#Check for ending sentinel
-		lw	$t0 0($a0)
-		li	$t1 -1
-		beq	$t0 $t1 main_done
-
-		#run student output code
-		sw	$a0 pointerStorage
-		jal	disassembleBranch
-
-		#print newline
-		la	$a0 nlStrCom
-		li	$v0 4
-		syscall
-
-		#reload and increment $a0
-		lw	$a0 pointerStorage
-		addi	$a0 $a0 4
-		j	main_loop
-	
-	main_err:
-		la	$a0 noFileStr
-		li	$v0 4
-		syscall
-	main_done:
-		li	$v0 10
-		syscall
-
 disassembleBranch:
 # copy $a0 to $t9
 # $t9 now holds the same value of $a0 (address)
@@ -116,6 +47,7 @@ sra     $t5, $t0, 14
 addi    $t5, $t5, 4
 
 # new address = old address + offset
+# new address at $t9
 add     $t9, $t9, $t5
 
 ########################
@@ -164,20 +96,14 @@ _case_opcode_1:
     # just exit
     j       _exit
 
-# if beq or bne, set $t5 to 1 (need print rt)
-# else, set $t5 to 0 (print immediate after rs)
 
 _case_beq:
-	li      $t5, 1	# set flag
-
     la      $a0, str_beq
     li      $v0, 4
     syscall
     # printed beq
     j       _after_case
-
 _case_bne:
-	li      $t5, 1	# set flag
     la      $a0, str_bne
     li      $v0, 4
     syscall
@@ -185,7 +111,6 @@ _case_bne:
     j       _after_case
 
 _case_blez:
-	li      $t5, 0
     la      $a0, str_blez
     li      $v0, 4
     syscall
@@ -193,7 +118,6 @@ _case_blez:
     j       _after_case
 
 _case_bgtz:
-	li      $t5, 0
     la      $a0, str_bgtz
     li      $v0, 4
     syscall
@@ -201,7 +125,6 @@ _case_bgtz:
     j       _after_case
 
 _case_bgez:
-	li      $t5, 0
     la      $a0, str_bgez
     li      $v0, 4
     syscall
@@ -209,7 +132,6 @@ _case_bgez:
     j       _after_case
 
 _case_bgezal:
-	li      $t5, 0
     la      $a0, str_bgezal
     li      $v0, 4
     syscall
@@ -217,7 +139,6 @@ _case_bgezal:
     j       _after_case
 
 _case_bltz:
-	li      $t5, 0
     la      $a0, str_bltz
     li      $v0, 4
     syscall
@@ -225,7 +146,6 @@ _case_bltz:
     j       _after_case
 
 _case_bltzal:
-	li      $t5, 0
     la      $a0, str_bltzal
     li      $v0, 4
     syscall
@@ -251,28 +171,28 @@ _after_case:
     li      $v0, 4
     syscall
 
-	# now we have "<name> $<rs>,"
-	# if $t5 == 0, goto _print_immediate
-	# 	else:	goto _print_rt
-	beqz    $t5, _print_immediate
-# _print_rt:
-	la      $a0, str_space
-    li      $v0, 4
-    syscall
-    
-    la      $a0, str_dollar
-    li      $v0, 4
-    syscall
-    # rt in stored at $t6
-    # addi    $a0, $t6, 0
-    move    $a0, $t6
-    li      $v0, 1
-    syscall
-
-    la      $a0, str_comma
-    li      $v0, 4
-    syscall
 _print_immediate:
-	
-	
-	j       _exit
+    li      $t0, 8
+    li      $t1, 10
+
+    _loop_head:
+    beqz    $t0, _exit  # while t0 != 0
+    srl     $t5, $t9, 28
+    # now $t5 has the top 4 bits of the new address
+    blt     $t5, $t1, _set_num
+    # if not branched, $t5 >= 10, do set_letter
+        addi    $t5, $t5, 87 
+        j       _print_hex_char
+        _set_num:
+        addi    $t5, $t5, 48
+
+    _print_hex_char:
+    move    $a0, $t5
+    li      $v0, 11
+    syscall
+     
+    sll     $t9, $t9, 4
+    
+    addi    $t0, $t0, -1    # $t0--;
+    j       _loop_head
+
